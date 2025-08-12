@@ -3,6 +3,7 @@ package com.davicesar.elevadorAPI.controller;
 import com.davicesar.elevadorAPI.dto.ElevadorDTO;
 import com.davicesar.elevadorAPI.model.Andar;
 import com.davicesar.elevadorAPI.service.ElevadorService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,8 +28,15 @@ public class ElevadorController {
     }
 
     @PostMapping("/addAndar")
-    public void adicionarAndar(@RequestBody Andar andar) {
-        elevadorService.addAndarNaFila(andar);
+    public ResponseEntity<String> adicionarAndar(@RequestBody Andar andar) {
+        try {
+            elevadorService.addAndarNaFila(andar);
+            return ResponseEntity.ok("Andar adicionado com sucesso");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Erro: " + e.getMessage());
+        }
     }
 
 }

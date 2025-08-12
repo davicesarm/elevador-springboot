@@ -21,6 +21,14 @@ public class ElevadorService {
     }
 
     public void addAndarNaFila(Andar andar) {
+        if (andar.numero() > elevador.getAndarMaximo()) {
+            throw new IllegalArgumentException("Andar " + andar.numero() + " maior que o máximo permitido: " + elevador.getAndarMaximo());
+        }
+
+        if (andar.numero() < elevador.getAndarMinimo()) {
+            throw new IllegalArgumentException("Andar " + andar.numero() + " menor que o mínimo permitido: " + elevador.getAndarMinimo());
+        }
+
         Boolean[] direcoes = filaAndares.computeIfAbsent(
                 andar.numero(),
                 k -> {
