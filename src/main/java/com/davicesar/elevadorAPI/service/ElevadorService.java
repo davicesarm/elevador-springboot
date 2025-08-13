@@ -12,11 +12,15 @@ public class ElevadorService {
     private final Elevador elevador;
     private final TreeMap<Integer, Boolean[]> filaAndares;
     private Direcao direcaoElevador;
+    private boolean paradoNoAndar;
+    private volatile long fimDaPausaTimestamp;
 
     public ElevadorService() {
         this.elevador = new Elevador();
         this.filaAndares = new TreeMap<>();
         this.direcaoElevador = Direcao.DESCENDO;
+        this.paradoNoAndar = false;
+        this.fimDaPausaTimestamp = 0;
         new Thread(this::mainLoop).start();
     }
 
@@ -53,8 +57,14 @@ public class ElevadorService {
         Direcao direcao = this.direcaoElevador;
         ArrayList<Integer> andaresApertados = new ArrayList<>(filaAndares.keySet());
 
+        long tempoRestante = getTempoRestantePausaMs();
+
         return new ElevadorDTO(
-                andarAtual, andarMaximo, andarMinimo, direcao, andaresApertados, filaAndares
+                andarAtual, paradoNoAndar,
+                andarMaximo, andarMinimo,
+                direcao, andaresApertados,
+                // filaAndares,
+                tempoRestante
         );
     }
 
@@ -90,7 +100,9 @@ public class ElevadorService {
         if (andaresNaFila[direcaoIndice] || andaresNaFila[neutroIndice]) {
             andaresNaFila[direcaoIndice] = false;
             andaresNaFila[neutroIndice] = false;
+            paradoNoAndar = true;
             pausarElevador(1500);
+            paradoNoAndar = false;
         }
 
         if (Arrays.stream(andaresNaFila).noneMatch(valor -> valor)) {
@@ -121,9 +133,15 @@ public class ElevadorService {
     }
 
     private void pausarElevador(int tempoMs) {
+        fimDaPausaTimestamp = System.currentTimeMillis() + tempoMs;
         try { Thread.sleep(tempoMs); }
         catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private long getTempoRestantePausaMs() {
+        long restante = fimDaPausaTimestamp - System.currentTimeMillis();
+        return Math.max(restante, 0);
     }
 }
