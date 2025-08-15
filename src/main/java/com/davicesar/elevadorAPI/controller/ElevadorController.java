@@ -7,12 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "*")
 public class ElevadorController {
     private final ElevadorService elevadorService;
 
-    public ElevadorController () {
-        this.elevadorService = new ElevadorService();
+    public ElevadorController (ElevadorService elevadorService) {
+        this.elevadorService = elevadorService;
     }
 
     @GetMapping("/status")
